@@ -26,7 +26,7 @@ opt input.ll -load=/path/to/LLVMEnzyme-VERSION.so -enzyme -o output.ll -S
 opt reports a error:`opt: unknown pass name 'enzyme'`
 
 May be beacause you are using  LLVM 13 or a higher version, which has switched to the new pass manager pipeline and we haven't yet turned that on within enzyme.
-For now you can just tell llvm to use the old pass manager by adding this flag to opt --enable-new-pm=0 or this flag to clang -fno-experimental-new-pass-manager
+For now you can just tell llvm to use the old pass manager by adding the `--enable-new-pm=0` flag to opt or `-flegacy-pass-manager` to clang.
 
 ### UNREACHABLE executed (GVN error)
 
