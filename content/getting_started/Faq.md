@@ -34,4 +34,4 @@ Until June 2020, LLVM's exisitng GVN pass had a bug handling invariant.load's th
 
 ## Other
 
-If you have an issue not resolved here, please make an issue on [Github](https://github.com/wsmoses/Enzyme) and consider making a pull request to this FAQ!
+If you have an issue not resolved here, please make an issue on [Github](https://github.com/EnzymeAD/Enzyme) and consider making a pull request to this FAQ!

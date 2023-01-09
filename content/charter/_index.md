@@ -9,7 +9,7 @@ Enzyme is a project for high-performance automatic differentiation. The Enzyme c
 
  * Join our [mailing list](https://groups.google.com/d/forum/enzyme-dev)
  * Join our weekly open-design call (see mailing list for meeting link)
- * Participate in development on [Github](https://github.com/wsmoses/Enzyme)
+ * Participate in development on [Github](https://github.com/EnzymeAD/Enzyme)
 
 
 # Abstract

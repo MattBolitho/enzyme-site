@@ -16,10 +16,10 @@ Currently, Homebrew has a pre-built binary (bottle) on macOS, but will build fro
 The rest of these instructions explain how to build Enzyme from source.
 
 ## Downloading Enzyme
-To start you should download Enzyme's code [Github](https://github.com/wsmoses/Enzyme).
+To start you should download Enzyme's code [Github](https://github.com/EnzymeAD/Enzyme).
 
 ```sh
-git clone https://github.com/wsmoses/Enzyme
+git clone https://github.com/EnzymeAD/Enzyme
 cd Enzyme
 ```
 
@@ -86,4 +86,4 @@ cmake .. -DLLVM_EXTERNAL_LIT=/path/to/lit/lit.py
 
 ## Developing inside a Container
 
-For debugging and testing purposes we have created [Docker images](https://github.com/tgymnich/enzyme-dev-docker), which closely resemble all of our CI environments. If you are using Visual Studio Code you can build and test Enzyme inside of a [Dev Container](https://code.visualstudio.com/docs/remote/containers). To change either the Ubuntu or the LLVM version in Visual Studio Code just edit the file at `.devcontainer/devcontainer.json` accordingly.
+For debugging and testing purposes we have created [Docker images](https://github.com/EnzymeAD/enzyme-dev-docker), which closely resemble all of our CI environments. If you are using Visual Studio Code you can build and test Enzyme inside of a [Dev Container](https://code.visualstudio.com/docs/remote/containers). To change either the Ubuntu or the LLVM version in Visual Studio Code just edit the file at `.devcontainer/devcontainer.json` accordingly.
