@@ -34,24 +34,25 @@ By differentiating code after optimization, Enzyme is able to create substantial
 
 Enzyme is composed of four pieces:
 
-*   An optional preprocessing phase which performs minor transformations that tend to be helpful for AD.
-*   A new interprocedural type analysis that deduces the underlying types of memory locations
-*   An activity analaysis that determines what instructions or values can impact the derivative computation (common in existing AD systems).
-*   An optimization pass which creates any required derivative functions, replacing calls to `__enzyme_autodiff` with the generated functions.
+* An optional preprocessing phase which performs minor transformations that tend to be helpful for AD.
+* A new interprocedural type analysis that deduces the underlying types of memory locations
+* An activity analaysis that determines what instructions or values can impact the derivative computation (common in existing AD systems).
+* AD-specific and other novel optimizations which create any required derivative functions, replacing calls to `__enzyme_autodiff` with the generated functions.
 
 ## More resources
 
 For more information on Enzyme, please see:
 
-*   The Enzyme [getting started guide](/getting_started/)
-*   The Enzyme [mailing list](https://groups.google.com/d/forum/enzyme-dev) for any questions.
-*   Previous [talks](/talks/).
-*   You can try out Enzyme on our [Compiler Explorer instance](/explorer).
+* The Enzyme [getting started guide](/getting_started/)
+* The Enzyme [getting involved guide](/getting_involved/)
+* Previous [talks](/talks/).
+* You can try out Enzyme on our [Compiler Explorer instance](/explorer).
 
 ## Citing Enzyme
 
-To cite Enzyme, please cite the following two papers (first for Enzyme as a whole, then for GPU+optimizations):
-```
+To cite Enzyme, please cite the following three papers (first for Enzyme as a whole, second for GPU+optimizations, and third for AD of arbitrary parallel programs):
+
+```latex
 @inproceedings{NEURIPS2020_9332c513,
  author = {Moses, William and Churavy, Valentin},
  booktitle = {Advances in Neural Information Processing Systems},
@@ -79,7 +80,19 @@ keywords = {CUDA, LLVM, ROCm, HPC, AD, GPU, automatic differentiation},
 location = {St. Louis, Missouri},
 series = {SC '21}
 }
-
+@inproceedings{10.5555/3571885.3571964,
+author = {Moses, William S. and Narayanan, Sri Hari Krishna and Paehler, Ludger and Churavy, Valentin and Schanen, Michel and H\"{u}ckelheim, Jan and Doerfert, Johannes and Hovland, Paul},
+title = {Scalable Automatic Differentiation of Multiple Parallel Paradigms through Compiler Augmentation},
+year = {2022},
+isbn = {9784665454445},
+publisher = {IEEE Press},
+booktitle = {Proceedings of the International Conference on High Performance Computing, Networking, Storage and Analysis},
+articleno = {60},
+numpages = {18},
+keywords = {automatic differentiation, tasks, OpenMP, compiler, Julia, parallel, Enzyme, C++, RAJA, hybrid parallelization, MPI, distributed, LLVM},
+location = {Dallas, Texas},
+series = {SC '22}
+}
 ```
 
 The original Enzyme is also avaiable as a preprint on [arXiv](https://arxiv.org/pdf/2010.01709.pdf).
