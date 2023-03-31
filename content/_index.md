@@ -36,8 +36,9 @@ Enzyme is composed of four pieces:
 
 * An optional preprocessing phase which performs minor transformations that tend to be helpful for AD.
 * A new interprocedural type analysis that deduces the underlying types of memory locations
-* An activity analaysis that determines what instructions or values can impact the derivative computation (common in existing AD systems).
-* AD-specific and other novel optimizations which create any required derivative functions, replacing calls to `__enzyme_autodiff` with the generated functions.
+* An activity analysis that determines what instructions or values can impact the derivative computation (common in existing AD systems).
+* An optimization pass which creates any required derivative functions, replacing calls to `__enzyme_autodiff` with the generated functions.
+* AD-specific and other novel optimizations to synthesize highly efficient derivatives
 
 ## More resources
 
