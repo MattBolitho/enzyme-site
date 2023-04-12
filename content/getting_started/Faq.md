@@ -25,8 +25,27 @@ opt input.ll -load=/path/to/LLVMEnzyme-VERSION.so -enzyme -o output.ll -S
 `
 opt reports a error:`opt: unknown pass name 'enzyme'`
 
-May be because you are using  LLVM 13 or a higher version, which has switched to the new pass manager pipeline and we haven't yet turned that on within enzyme.
-For now you can just tell llvm to use the old pass manager by adding the `--enable-new-pm=0` flag to opt or `-flegacy-pass-manager` to clang.
+May be because you are using  LLVM 13 or a higher version, which has switched to the new pass manager pipeline. On applicable LLVM versions (up to and including LLVM 15),
+you can specify that opt useees the old pass manager by adding the `--enable-new-pm=0` flag. Alternatively, you can use the new pass manager, which uses the following syntax
+for opt:
+
+`
+opt input.ll -load=/path/to/LLVMEnzyme-VERSION.so -passes=enzyme -o output.ll -S
+`
+
+Simiarly, clang has different syntax for plugins for the new pass manager. On LLVM versions up to and including LLVM 12, this is done as follows:
+`
+clang -Xclang -load -Xclang /path/to/ClangEnzyme-VERSION.so code.c
+`
+
+On LLVM 13 and above, the new pass manager is the default. If you would like to continue to use the old pass manager, you will also need to provide
+either `-fno-experimental-new-pass-manager` on versions <= 14, or `-flegacy-pass-manager` on LLVM 15. LLVM 16 and above dropped support for the legacy pass
+manager entirely.
+
+To use the new pass manager, the following command line args are required for Clang:
+`
+clang -fpass-plugin=/path/to/ClangEnzyme-VERSION.so code.c
+`
 
 ### UNREACHABLE executed (GVN error)
 
