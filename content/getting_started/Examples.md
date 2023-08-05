@@ -15,10 +15,10 @@ int enzyme_out;
 int enzyme_const;
 
 template < typename return_type, typename ... T >
-extern return_type __enzyme_fwddiff(void*, T ... );
+return_type __enzyme_fwddiff(void*, T ... );
 
 template < typename return_type, typename ... T >
-extern return_type __enzyme_autodiff(void*, T ... );
+return_type __enzyme_autodiff(void*, T ... );
 ```
 
 
@@ -41,9 +41,10 @@ printf("f(x) = %f, f'(x) = %f", f(x), df_dx);
 // prints f(x) = 25.000000, f'(x) = 10.000000
 ```
 
-So, we first tell enzyme which function we want to differentiate and then pass arguments the arguments following `enzyme_dup` are telling enzyme where to evaluate the derivative and how much to scale the derivative (we pick `dx = 1.0` to have unit scale). 
+The first argument tells enzyme which function we want to differentiate, and the subsequent 
+arguments describe where to evaluate the derivatve and in what "direction".
 
-Link to example: https://fwd.gymni.ch/yeLDzF
+Link to example: https://fwd.gymni.ch/Hx6hwt
 
 --------
 
@@ -110,7 +111,7 @@ There are two approaches:
 
 Option 1 has the benefit of flexibility-- we can choose to turn differentiation with respect to certain variables on or off at runtime. Option 2 hard codes which derivatives can be computed, which narrows scope and potentially improves performance. The appropriate choice will depend on the specific needs of your project.
 
-Link to example: https://fwd.gymni.ch/xoTj9R
+Link to example: https://fwd.gymni.ch/OJMdAx
 
 #### Reverse Mode
 
@@ -132,7 +133,7 @@ The value returned by `__enzyme_autodiff` is the concatenation of the different 
 
 > Note: it may be tempting to store the outputs in a `std::tuple< double, double >`, but the memory layout of `std::tuple` is implementation defined (e.g. some compilers implement `std::tuple<T, U, V>` with `V` first, `U` second, and `T` last). So, please don't store the outputs of `__enzyme_autodiff` in a `std::tuple`!
 
-Link to example: https://fwd.gymni.ch/gPPXUg
+Link to example: https://fwd.gymni.ch/HMFTsY
 
 ## Free Functions: Return-By-Reference
 
@@ -169,7 +170,7 @@ printf("f(x,y) = %f, df = %f\n", z, dz);
 
 Note: the by-reference arguments of the function are passed to `__enzyme_fwddiff` by address. 
 
-Link to example: https://fwd.gymni.ch/Uxo2JG
+Link to example: https://fwd.gymni.ch/BtpzAA
 
 #### Reverse Mode
 
@@ -193,7 +194,240 @@ printf("z = %f, mu.x = %f, mu.y = %f\n", z, mu.x, mu.y);
 #endif
 ```
 
-Link to example: https://fwd.gymni.ch/sfY5uu
+Link to example: https://fwd.gymni.ch/eYmIzw
 
 
+### Function Templates
+
+Function templates are treated much the same way as regular functions, except
+we need to explicitly include the template arguments when passing the function to
+enzyme. For example, if we had the following definition:
+
+```cpp
+template < typename T >
+void f(T x, T y, T & output) { output = x * y + 1.0 / y; }
+```
+
+Then the first argument looks like
+
+```cpp
+__enzyme_fwddiff<void>((void*)f<double>, enzyme_dup, x, dx, 
+                                         enzyme_dup, y, dy, 
+                                         enzyme_dupnoneed, &z, &dz);
+```
+
+Link to example: https://fwd.gymni.ch/WJVVRt
+
+
+## Member Functions
+
+Differentiating member functions with Enzyme is a little bit trickier, since a member
+function in C++ is effectively a function with an implicitly passed argument (the `this` pointer).
+This means that if we have an object with a member function
+
+```cpp
+struct MyObject {
+    double f(double y) { return x * y + 1.0 / y; }
+    double x;
+};
+```
+
+we can't pass `&MyObject::f` directly to `__enzyme_fwddiff(...)`. Instead, what
+we can do is write a free function that calls the desired member function:
+
+```cpp
+double wrapper(MyObject obj, double y) {
+    return obj.f(y);
+}
+```
+
+and pass _that_ to enzyme:
+
+```cpp
+double dfdy = __enzyme_fwddiff<double>((void*)wrapper, enzyme_const, obj, 
+                                                       enzyme_dup, y, dy);
+printf("dfdy = %f\n", dfdy);
+// prints dfdy = 5.500000
+```
+
+A more general implementation of the wrapper function (that works with
+different objects and argument types) is given below:
+
+```cpp
+template < typename T, typename ... arg_types >
+auto wrapper(T obj, arg_types && ... args) {
+    return obj.f(args ... );
+}
+
+...
+
+double dfdy = __enzyme_fwddiff<double>((void*)wrapper<MyObject, double>, 
+        enzyme_const, obj, 
+        enzyme_dup, &y, &dy);
+printf("dfdy = %f\n", dfdy);
+// prints dfdy = 5.500000
+```
+
+> Question: why do `y` and `dy` now have `&` in front when being passed to `__enzyme_fwddiff`?
+
+When passing information to `__enzyme_autodiff`, `__enzyme_fwddiff`:
+- if the differentiated function takes an argument by value, then we pass it to enzyme by value
+- if the differentiated function takes an argument by pointer, reference or rvalue-ref, then we pass it to enzyme by pointer
+
+Link to example: https://fwd.gymni.ch/y0scib
+
+
+
+If we want to differentiate with respect to the data members of the object (`x` in this case), we can annotate the object argument as `enzyme_dup`:
+
+```cpp
+MyObject dobj{2.0};
+double dfdx = __enzyme_fwddiff<double>((void*)wrapper<MyObject, double>, 
+        enzyme_dup, obj, dobj 
+        enzyme_const, &y);
+printf("dfdx = %f\n", dfdx);
+```
+
+Link to example: https://fwd.gymni.ch/wlC87F
+
+
+
+## Functors and Lambda Functions
+
+Functors are C++ objects that implement an `operator()` member, so they can be invoked like functions. Our previous example could have been implemented in the following way instead
+
+```cpp
+struct MyObject {
+    double operator()(double y) const { return x * y + 1.0 / y; }
+    double x;
+};
+
+double wrapper(const MyObject & f, double y) {  return f(y); }
+
+...
+    
+double dfdy = __enzyme_fwddiff<double>((void*)(wrapper<MyObject, double>), 
+    enzyme_const, (void*)&obj,
+    enzyme_dup, &y, &dy);
+printf("dfdy = %f\n", dfdy);
+// prints dfdy = 0.750000
+```
+
+We can see that it is handled in the same way as regular member functions (passed to enzyme through a wrapper class).
+
+--------
+
+Lambda functions are another common C++ idiom for expressing function definitions in-line:
+
+```cpp
+auto f = [](double x, double y) { return x * y + 1.0 / y; };
+```
+
+Behind the scenes, the compiler expands the definitions of the lambdas above into functor objects
+
+```cpp
+// what the compiler "sees" when we type 
+// auto f = [](double x, double y) { return x * y + 1.0 / y; };
+
+class __lambda_f {
+  public: 
+    inline /*constexpr */ double operator()(double x, double y) const {
+      return (x * y) + (1.0 / y);
+    }
+    
+    using retType_f = double (*)(double, double);
+    inline constexpr operator retType_f () const noexcept {
+      return __invoke;
+    };
+    
+    private: 
+    static inline /*constexpr */ double __invoke(double x, double y) {
+      return __lambda_f{}.operator()(x, y);
+    }    
+};
+
+__lambda_f f = __lambda_f{};
+```
+
+This means there are a few ways to differentiate this kind of lambda function:
+
+1. Passing directly to Enzyme
+
+   ```cpp
+   double dfdx = __enzyme_fwddiff<double>((void*)+f, 
+     enzyme_dup, x, dx,
+     enzyme_const, y);
+   printf("dfdx = %f\n", dfdx);
+   // dfdx = 6.200000
+   ```
+
+   Note: since `f` doesn't capture anything, it can implicitly convert to a function pointer, which Enzyme can handle directly. The weird `+f` in the first argument is a rarely-used unary operator that makes `f` convert to a function pointer.
+
+2. Using the member function wrapper from above
+   ```cpp
+   double dfdy = __enzyme_fwddiff<double>((void*)(wrapper<decltype(f), double, double>), 
+           enzyme_const, (void*)&f,
+           enzyme_const, &x,
+           enzyme_dup, &y, &dy);
+   printf("dfdy = %f\n", dfdy);
+   // dfdy = 0.750000
+   ```
+
+   Note: the lambda is explicitly cast to `(void*)` to suppress a compilation error. This error arises because, regularly, C++ has no way to specialize an `extern` template like `__enzyme_fwddiff(...)` using a type in a local scope (i.e. the lambda function), but Enzyme does not have this limitation.
+
+3. Using a similar wrapper with non-type template parameter (requires C++20)
+
+   ```cpp
+   // C++20 or later
+   template < auto obj, typename ... arg_types >
+   auto wrapper(arg_types && ... args) {
+       return obj(args ... );
+   }
+   
+   ...
+   
+   double dfdy = __enzyme_fwddiff<double>((void*)(wrapper<f, double, double>), 
+       enzyme_const, &x,
+       enzyme_dup, &y, &dy);
+   printf("dfdy = %f\n", dfdy);
+   // dfdy = 0.750000
+   ```
+
+
+
+Link to examples: https://fwd.gymni.ch/wkgeoL
+
+------
+
+Instead, if a lambda function captures variables from its surrounding scope
+
+```cpp
+double x = 2.0;
+auto f = [x](double y) { return x * y + 1.0 / y; };
+```
+
+then the compiler-generated functor object for the lambda expression is slightly different:
+
+```cpp
+// what the compiler "sees" when we type 
+// double x = 2.0;
+// auto f = [x](double y) { return x * y + 1.0 / y; };
+
+class __lambda_f  {
+ public: 
+  inline /*constexpr */ double operator()(double y) const {
+    return (x * y) + (1.0 / y);
+  }
+    
+  __lambda_f(double & _x) : x{_x}{}
+    
+ private: 
+  double x;
+};
+
+double x = 2.0;
+__lambda_f f = __lambda_f{x};
+```
+
+An important difference is that by capturing, the lambda no longer generates the `static __invoke()` method or the implicit conversion to a function pointer, which means option #1 above (passing directly to Enzyme) will not work.
 

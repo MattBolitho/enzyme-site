@@ -51,20 +51,22 @@ double sumAndMul(double* array, size_t size, double mul) {
   for(int i=0; i<size; i++) {
     sum += array[i];
   }
-  return sum * mul
+  return sum * mul;
 }
 
 ...
-double d_mul = __enzyme_autodiff(sumAndMul,
+    
+double d_mul = __enzyme_autodiff<double>((void*)sumAndMul,
                      /*duplicated argument*/array, d_array,
                      /*inactive argument*/size,
                      /*output argument*/mul);
-...
+
+// link to complete example: https://fwd.gymni.ch/78Hsev
 ```
 
 Enzyme will automatically attempt to deduce the classification of argument types. Generally, these rules assume that integer types are inactive arguments, floating-point types are output arguments, and pointer-types are duplicated arguments. A user, however, can explicitly specify the desired classification by using LLVM metadata.
 
-Inactive arguments are given `enzyme_const` metadata; output arguments are given `enzyme_out` metadata; and duplicated arguments are given `enzyme_dup`.
+Inactive arguments are given `enzyme_const` metadata; output arguments are given `enzyme_out` metadata (note: `enzyme_out` only works for arguments passed by-value); and duplicated arguments are given `enzyme_dup`.
 
 ```llvm
 %d_mul = tail call double @__enzyme_autodiff(double (double*, i64, double)* @sumAndMul, metadata !"enzyme_dup", double* %array, double* %d_array, metadata !"enzyme_const", i64 %size, metadata !"enzyme_out", double %mul)
@@ -73,13 +75,12 @@ Inactive arguments are given `enzyme_const` metadata; output arguments are given
 To ease the process of writing frontends, Enzyme also will consider loads to global values with specific names as a mechanism to specify argument classification.
 
 ```c
-
 int enzyme_dup;
 int enzyme_out;
 int enzyme_const;
 
 int main() {
-  double d_mul = __enzyme_autodiff(sumAndMul,
+  double d_mul = __enzyme_autodiff<double>((void*)sumAndMul,
                        enzyme_dup  , array, d_array,
                        enzyme_const, size,
                        enzyme_out  , mul);
@@ -91,7 +92,6 @@ int main() {
 Enzyme assumes that shadow arguments passed in are already initialized and have the same structure as the primal values. Running Enzyme's generated gradient will increment the shadow value by the amount of the resultant gradient. As a result, this usually means that you want to zero-initialize the shadow prior to calling the gradient.
 
 ```c
-
 double   array[10] = { ... };
 double d_array[10] = { 0.0 };
 
@@ -107,7 +107,7 @@ For complex datastructures passed as arguments, this requires doing a correspond
 struct List {
   double value;
   List* next;
-}
+};
 
 double sumList(List* next);
 List* mklist(double value, List* next);
@@ -136,7 +136,7 @@ void main() {
   ...
   double loss;
   double d_loss = 1.0;
-  __enzyme_autodiff(neuralNet,
+  __enzyme_autodiff<void>((void*)neuralNet,
                     enzyme_dupnoneed, &loss, &d_loss,
                     enzyme_dup,       W, d_W,
                     enzyme_dup,       b, d_b,
@@ -165,7 +165,7 @@ MyClass d_compute(MyClass& in) {
   MyClass d_in(0.0);
   MyClass out;
   MyClass d_out(1.0);
-  __enzyme_autodiff(wrapper, &in, d_in, out, d_out);
+  __enzyme_autodiff<void>((void*)wrapper, &in, d_in, out, d_out);
   return d_in;
 }
 ```
