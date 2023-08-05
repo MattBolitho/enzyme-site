@@ -128,10 +128,10 @@ clang output.ll -O3 -o a.exe
 Moreover, using Enzyme's clang plugin, we could automate the entire AD and compilation in a single command. Using the clang plugin should be done by default as it improves the user experience as well as various default performance options. However, the example above is still useful to understand how Enzyme works on LLVM.
 
 ```sh
-clang test.c -Xclang -load -Xclang /path/to/Enzyme/enzyme/build/Enzyme/LLVMEnzyme-<VERSION>.so -o a.exe
+clang test.c -fplugin=/path/to/Enzyme/enzyme/build/Enzyme/ClangEnzyme-<VERSION>.so -o a.exe
 ```
 
-Note that each version of Clang/LLVM will have slightly different command line flags to specifying plugins. See [the FAQ](/getting_started/Faq) for more information.
+Note that if using the LLVM plugin, each version of LLVM will have slightly different command line flags to specifying plugins. See [the FAQ](/getting_started/Faq) for more information. If using the clang plugin, the same command should work independently of version.
 
 ## Advanced options
 

@@ -50,7 +50,7 @@ int main() {
 A one-liner compilation of the above using Enzyme:
 
 ``` sh
-clang test2.cpp -Xclang -load -Xclang /path/to/ClangEnzyme-11.so -O2 
+clang test2.cpp -fplugin=/path/to/ClangEnzyme-11.so -O2 
 ```
 
 ## CUDA Example
@@ -130,7 +130,7 @@ int main() {
 For convenience, a one-liner compilation step is (against sm_70):
 
 ```sh
-clang test3.cu -Xclang -load -Xclang /path/to/ClangEnzyme-11.so -O2 --cuda-gpu-arch=sm_70 -lcudart -L/usr/local/cuda-10.1/lib64
+clang test3.cu -fplugin=/path/to/ClangEnzyme-11.so -O2 --cuda-gpu-arch=sm_70 -lcudart -L/usr/local/cuda-10.1/lib64
 ```
 
 Note that this procedure (using ClangEnzyme as opposed to LLVMEnzyme manually) inserts Enzyme at a specific locaton in LLVM's optimization pipeline. The default ordering should be reasonable, however, the precise ordering of optimization passes may [impact performance](https://proceedings.mlsys.org/paper/2020/file/4e732ced3463d06de0ca9a15b6153677-Paper.pdf). If there is a performance issue that you suspect may be due to optimization ordering, please [open an issue](https://github.com/EnzymeAD/Enzyme/issues/new).
