@@ -35,10 +35,6 @@ opt input.ll -load=/path/to/LLVMEnzyme-VERSION.so -passes=enzyme -o output.ll -S
 
 If you are using CMake, Enzyme exports a special `ClangEnzymeFlags` target which will automatically add the correct flags. See [here](https://github.com/EnzymeAD/Enzyme/blob/main/enzyme/test/test_find_package/CMakeLists.txt#L14) for an example.
 
-### UNREACHABLE executed (GVN error)
-
-Until June 2020, LLVM's exisitng GVN pass had a bug handling invariant.load's that would cause it to crash. These tend to be generated a lot by Enzyme for better optimization. This was reported [here](https://bugs.llvm.org/show_bug.cgi?id=46054) and resolved in master. Options for resolving include updating to later verison of LLVM with the fix, or disabling creation of invariant.load's.
-
 ## Other
 
 If you have an issue not resolved here, please make an issue on [Github](https://github.com/EnzymeAD/Enzyme) and consider making a pull request to this FAQ!
