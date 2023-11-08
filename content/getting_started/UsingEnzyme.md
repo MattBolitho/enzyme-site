@@ -5,6 +5,19 @@ draft: false
 weight: 10
 ---
 
+## Differentiating C/C++
+
+Enzyme supports differentiating C/C++ code through ClangEnzyme and LLDEnzyme as compiler and linker plugins, respectively.
+Clang gives our plugin more flexibility in adding and ordering optimization passes than LLD and therefore using ClangEnzyme could result in better performance than LLDEnzyme.
+However, ClangEnzyme can only differentiate one compilation unit at a time and will therefore fail if the function which you try to differentiate calls functions
+in other compilation units (generally other .c or .cpp files). In these cases we recommend the use of LLDEnzyme in combination with LTO.
+Finally, for full control you can also compile your c/c++ project down to LLVM-IR and pass it directly to LLVMEnzyme, see the example below.
+
+An example for using LLDEnzyme as part of CMake is available [here](https://github.com/EnzymeAD/Enzyme/blob/main/enzyme/test/test_find_package/CMakeLists.txt).
+Examples for using ClangEnzyme or LLVMEnzyme without CMake are given below, but please keep in mind that the plugin infrastructure and syntax changed a few times 
+and will generally depend on your LLVM Version. Please open an issue if you encounter issues (and please extend this section [here](https://github.com/EnzymeAD/www) if you have time!)
+
+
 ## Generating LLVM
 
 To begin, let's create a simple code `test.c` we want to differentiate. Enzyme will replace any calls to functions whose names contain "\_\_enzyme\_autodiff" with calls to the corresponding For now, let's ignore the details of Enzyme's calling convention/ABI which are described in detail [here](/getting_started/CallingConvention)
