@@ -30,7 +30,7 @@ you can specify that opt useees the old pass manager by adding the `--enable-new
 for opt:
 
 ```sh
-opt input.ll -load=/path/to/LLVMEnzyme-VERSION.so -passes=enzyme -o output.ll -S
+opt input.ll -load-pass-plugin=/path/to/LLVMEnzyme-VERSION.so -passes=enzyme -o output.ll -S
 ```
 
 If you are using CMake, Enzyme exports a special `ClangEnzymeFlags` target which will automatically add the correct flags. See [here](https://github.com/EnzymeAD/Enzyme/blob/main/enzyme/test/test_find_package/CMakeLists.txt#L14) for an example.
