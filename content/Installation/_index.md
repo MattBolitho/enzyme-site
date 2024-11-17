@@ -58,9 +58,10 @@ ninja
 This should create a file `Enzyme/LLVMEnzyme-<VERSION>.so` inside the build directory, which contains the LLVM analysis and optimization passes that implement Enzyme.
 
 Alternatively, [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) can be used to execute or extend a pre-configured build.
-We can see a list of all available presets by running `cmake --list-presets` in the directory of the root CMake project.
+We can see a list of all available configure presets by running `cmake --list-presets` in the directory of the root CMake project.
+Run `cmake --build --list-presets` for a list of build presets.
 
-To build Enzyme using CMake presets, pass the name of the desired configure and build presets to the `cmake` invocation.
+To build Enzyme using CMake presets, pass the names of the desired configure and build presets to the `cmake` invocation.
 
 ```sh
 cmake --preset x64-linux-clang-release -DLLVM_DIR=/path/to/llvm/lib/cmake/llvm
